@@ -192,7 +192,7 @@ app.post("/upload/credentials/:id", cors(), (req, res) => {
     return res.status(400).json({ msg: "file upload failed" });
   }
 
-  const fileName = `${file.name}${Math.random()}`;
+  const fileName = `${Math.random().toString().slice(2, 10)}-${file.name}`;
   console.log(fileName);
   console.log(req.params.id);
 
@@ -252,8 +252,9 @@ app.post(`/user/create/meeting`, (req, res) => {
 });
 
 app.post(`/user/registration`, (req, res) => {
-  console.log(req.body);
+
   const user = req.body;
+
   const post = {
     first_name: user.firstName,
     last_name: user.lastName,
@@ -279,7 +280,6 @@ app.post(`/user/registration`, (req, res) => {
 });
 
 app.get(`/attorney/requests/:id`, (req, res) => {
-  console.log(req.params.id);
   connection.query(
     `SELECT 
               first_name,
@@ -401,7 +401,7 @@ app.post(`/case/upload/documents/:id`, cors(), (req, res) => {
     return res.status(400).json({ msg: "file upload failed" });
   }
 
-  const fileName = `${file.name}${Math.random()}`;
+  const fileName = `${Math.random().toString().slice(2, 10)}-${file.name}`;
   console.log(fileName);
   console.log(req.params.id);
 
@@ -480,14 +480,37 @@ app.post("/cases/creation", (req, res) => {
   );
 });
 
-app.get("/test/created/cases", (req, res) => {
-  connection.query(
+app.get("/attorney/:id/created/cases", (req, res) => {
+    
+    connection.query(
     `SELECT c.id,case_state,start_date,end_date,client_id,
       attorney_id,first_name,last_name
       ,email,is_permitted,role_id,address_id
     FROM cases c
     Join users u
-    on c.client_id=u.id`,
+    on c.client_id=u.id
+    WHERE c.attorney_id = ?
+
+    `, req.params.id,
+    (error, results, fields) => {
+      console.log(results);
+      res.send(results);
+    }
+  );
+});
+
+app.get("/client/:id/created/cases", (req, res) => {
+    
+    connection.query(
+    `SELECT c.id,case_state,start_date,end_date,client_id,
+      attorney_id,first_name,last_name
+      ,email,is_permitted,role_id,address_id
+    FROM cases c
+    Join users u
+    on c.attorney_id=u.id
+    WHERE c.client_id = ?
+
+    `, req.params.id,
     (error, results, fields) => {
       console.log(results);
       res.send(results);
