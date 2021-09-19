@@ -252,7 +252,6 @@ app.post(`/user/create/meeting`, (req, res) => {
 });
 
 app.post(`/user/registration`, (req, res) => {
-
   const user = req.body;
 
   const post = {
@@ -319,6 +318,52 @@ app.post(`/user/address/entry`, (req, res) => {
         throw error;
       } else {
         return res.send(results);
+      }
+    }
+  );
+});
+
+app.get("/admin/summon/client", (req, res) => {
+  connection.query(
+    `select * from users where role_id=1`,
+    (error, results, fields) => {
+      if (error) {
+        throw error;
+      } else {
+        res.send(results);
+      }
+    }
+  );
+});
+
+app.get("/admin/summon/attorney", (req, res) => {
+  connection.query(
+    `select * from users where role_id=2`,
+    (error, results, fields) => {
+      if (error) {
+        throw error;
+      } else {
+        res.send(results);
+      }
+    }
+  );
+});
+
+app.post(`/admin/action/:id`, (req, res) => {
+  console.log(req.params.id);
+
+  console.log(typeof req.body.is_permitted);
+
+  connection.query(
+    `update users
+  SET is_permitted=?
+  where id=?`,
+    [req.body.is_permitted, req.params.id],
+    (error, results, fields) => {
+      if (error) {
+        throw error;
+      } else {
+        res.send(results);
       }
     }
   );
@@ -481,8 +526,7 @@ app.post("/cases/creation", (req, res) => {
 });
 
 app.get("/attorney/:id/created/cases", (req, res) => {
-    
-    connection.query(
+  connection.query(
     `SELECT c.id,case_state,start_date,end_date,client_id,
       attorney_id,first_name,last_name
       ,email,is_permitted,role_id,address_id
@@ -491,7 +535,8 @@ app.get("/attorney/:id/created/cases", (req, res) => {
     on c.client_id=u.id
     WHERE c.attorney_id = ?
 
-    `, req.params.id,
+    `,
+    req.params.id,
     (error, results, fields) => {
       console.log(results);
       res.send(results);
@@ -500,8 +545,7 @@ app.get("/attorney/:id/created/cases", (req, res) => {
 });
 
 app.get("/client/:id/created/cases", (req, res) => {
-    
-    connection.query(
+  connection.query(
     `SELECT c.id,case_state,start_date,end_date,client_id,
       attorney_id,first_name,last_name
       ,email,is_permitted,role_id,address_id
@@ -510,7 +554,8 @@ app.get("/client/:id/created/cases", (req, res) => {
     on c.attorney_id=u.id
     WHERE c.client_id = ?
 
-    `, req.params.id,
+    `,
+    req.params.id,
     (error, results, fields) => {
       console.log(results);
       res.send(results);
